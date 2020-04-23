@@ -40,24 +40,23 @@
     },
     created() {
       // this._getRecommend();
-      
       // setTimeout(() => {
       //   this._getDiscList();
       // }, 1000)
-      this._getDiscList();
+      this._getDiscList()
     },
     methods: {
-      _getRecommend: function(){
+      _getRecommend: function() {
         getRecommend().then((res) => {
-          if(res.code === ERR_OK){
-            console.log(res.data);
+          if (res.code === ERR_OK) {
+            console.log(res.data)
           }
         })
       },
-      _getDiscList(){
+      _getDiscList() {
         getDiscList().then((res) => {
-          if(res.code === ERR_OK){
-            this.discList = res.data.list;
+          if (res.code === ERR_OK) {
+            this.discList = res.data.list
           }
         })
       }

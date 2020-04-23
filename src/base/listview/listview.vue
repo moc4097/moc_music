@@ -10,13 +10,14 @@
       <li v-for="group in data" class="list-group" ref="listGroup">
         <h2 class="list-group-title">{{ group.title }}</h2>
         <ul>
-          <li v-for="item in group.items" class="list-group-item">
+          <li @click="selectItem(item)" v-for="item in group.items" class="list-group-item">
             <img class="avatar" v-lazy="item.avatar" />
             <span class="name">{{ item.name }}</span>
           </li>
         </ul>
       </li>
     </ul>
+    <!-- 右侧快速入口 -->
     <div class="list-shortcut"
           @touchstart="onShortcutTouchStart"
           @touchmove.prevent="onShortcutTouchMove"
@@ -31,6 +32,7 @@
         </li>
       </ul>
     </div>
+    <!-- 用来作为分类名过渡的 -->
     <div class="list-fixed" v-show="fixedTitle" ref="fixed">
       <h1 class="fixed-title">{{ fixedTitle }}</h1>
     </div>
@@ -46,9 +48,9 @@
   import Scroll from 'base/scroll/scroll'
 
   // 右侧快速入口每一项的高度
-  const ANCHOR_HEIGHT = 18;
+  const ANCHOR_HEIGHT = 18
   // 每个类别的title
-  const TITLE_HEIGHT = 30;
+  const TITLE_HEIGHT = 30
 
   export default {
     created() {
@@ -67,30 +69,35 @@
     props: {
       data: {
         type: Array,
-        default: []
+        default: () => {
+          return []
+        }
       }
     },
     computed: {
       // 获取右侧快速入口的列表
       shortcutList() {
         return this.data.map((group) => {
-          return group.title.substr(0, 1);
+          return group.title.substr(0, 1)
         })
       },
       fixedTitle() {
-        if(this.scrollY > 0) {
+        if (this.scrollY > 0) {
           return ''
         }
         return this.data[this.currentIndex] ? this.data[this.currentIndex].title : ''
       }
     },
     methods: {
+      selectItem(item) {
+        this.$emit('select', item)
+      },
       onShortcutTouchStart(e) {
         // 获取当前点击锚点索引
-        let anchorIndex = getData(e.target, 'index');
+        let anchorIndex = getData(e.target, 'index')
 
         // 获取当前的y轴位置和锚点索引，存入touch对象中
-        let firstTouch = e.touches[0];
+        let firstTouch = e.touches[0]
         this.touch.y1 = firstTouch.pageY
         this.touch.anchorIndex = anchorIndex
 
@@ -99,11 +106,11 @@
       },
       onShortcutTouchMove(e) {
         // 获取当前的y轴位置，存入touch对象中
-        let firstTouch = e.touches[0];
+        let firstTouch = e.touches[0]
         this.touch.y2 = firstTouch.pageY
 
         // 获取偏移量
-        let delta = (this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT | 0;
+        let delta = (this.touch.y2 - this.touch.y1) / ANCHOR_HEIGHT | 0
 
         // 通过偏移量获取当前锚点
         let anchorIndex = parseInt(this.touch.anchorIndex) + delta
@@ -111,20 +118,20 @@
         this._scrollTo(anchorIndex)
       },
       scroll(pos) {
-        this.scrollY = pos.y;
+        this.scrollY = pos.y
       },
       _scrollTo(index) {
         this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0)
       },
       _calculateHeight() {
-        this.listHeight = [];
-        const list = this.$refs.listGroup;
-        let height = 0;
-        this.listHeight.push(height);
-        for(let i = 0; i < list.length; i++) {
-          let item = list[i];
-          height += item.clientHeight;
-          this.listHeight.push(height);
+        this.listHeight = []
+        const list = this.$refs.listGroup
+        let height = 0
+        this.listHeight.push(height)
+        for (let i = 0; i < list.length; i++) {
+          let item = list[i]
+          height += item.clientHeight
+          this.listHeight.push(height)
         }
       }
     },
@@ -135,30 +142,30 @@
         }, 20)
       },
       scrollY(newY) {
-        const listHeight = this.listHeight;
+        const listHeight = this.listHeight
         // 当滚动到顶部
-        if(newY > 0) {
+        if (newY > 0) {
           this.currentIndex = 0
           return
         }
         // 在中间部分滚动
-        for(let i = 0; i < listHeight.length - 1; i++) {
-          let height1 = listHeight[i];
-          let height2 = listHeight[i + 1];
+        for (let i = 0; i < listHeight.length - 1; i++) {
+          let height1 = listHeight[i]
+          let height2 = listHeight[i + 1]
 
-          if(-newY >= height1 && -newY < height2) {
-            this.currentIndex = i;
-            this.diff = height2 + newY;
+          if (-newY >= height1 && -newY < height2) {
+            this.currentIndex = i
+            this.diff = height2 + newY
             return
           }
         }
         // 当滚动到底部，且-newY大于最后一个元素的上限
-        this.currentIndex = listHeight.length - 2;
+        this.currentIndex = listHeight.length - 2
       },
       diff(newVal) {
         // 偏移量
-        let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? newVal - TITLE_HEIGHT : 0;
-        if(this.fixedTop === fixedTop) {
+        let fixedTop = (newVal > 0 && newVal < TITLE_HEIGHT) ? newVal - TITLE_HEIGHT : 0
+        if (this.fixedTop === fixedTop) {
           return
         }
         this.fixedTop = fixedTop
