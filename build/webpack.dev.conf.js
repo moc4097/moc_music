@@ -25,22 +25,6 @@ const devWebpackConfig = merge(baseWebpackConfig, {
   // these devServer options should be customized in /config/index.js
   devServer: {
     before(app) {
-      app.get('/api/getDiscList', function(req, resp) {
-        const url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg';
-
-        axios.get(url, {
-          headers: {
-            referer: 'https://c.y.qq.com/',
-            host: 'c.y.qq.com'
-          },
-          params: req.query
-        }).then((res) => {
-          resp.json(res.data)
-        }).catch((error) => {
-          console.log(error);
-        });
-      })
-
       app.get('/api/getRecommend', function(req, resp) {
         const url = 'https://c.y.qq.com/musichall/fcgi-bin/fcg_yqqhomepagerecommend.fcg';
 
@@ -57,15 +41,31 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         });
       })
 
-      app.post('/api/getPurlUrl', bodyParser.json(), function(req, resp) {
-        const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+      app.get('/api/getDiscList', function(req, resp) {
+        const url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg';
 
-        axios.post(url, req.body, {
+        axios.get(url, {
           headers: {
-            referer: 'https://y.qq.com/',
-            origin: 'https://y.qq.com',
-            'Content-type': 'application/x-www-form-urlencoded'
-          }
+            referer: 'https://c.y.qq.com/',
+            host: 'c.y.qq.com'
+          },
+          params: req.query
+        }).then((res) => {
+          resp.json(res.data)
+        }).catch((error) => {
+          console.log(error);
+        });
+      })
+
+      app.get('/api/getSongMenu', function(req, resp) {
+        const url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
+
+        axios.get(url, {
+          headers: {
+            referer: 'https://c.y.qq.com/',
+            host: 'c.y.qq.com'
+          },
+          params: req.query
         }).then((res) => {
           // 如果请求的是jsonp数据，则使用正则对jsonp数据分析获取里面的json
           var ret = res.data
@@ -82,6 +82,22 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         })
       })
 
+      app.post('/api/getPurlUrl', bodyParser.json(), function(req, resp) {
+        const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+
+        axios.post(url, req.body, {
+          headers: {
+            referer: 'https://y.qq.com/',
+            origin: 'https://y.qq.com',
+            'Content-type': 'application/x-www-form-urlencoded'
+          }
+        }).then((res) => {
+          resp.json(res.data)
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
+
       app.get('/api/getLyric', function(req, resp) {
         const url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
 
@@ -92,7 +108,16 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           },
           params: req.query
         }).then((res) => {
-          resp.json(res.data)
+          // 如果请求的是jsonp数据，则使用正则对jsonp数据分析获取里面的json
+          var ret = res.data
+          if (typeof ret === 'string') {
+            var reg = /^\w+\(({[^()]+})\)$/
+            var matches = ret.match(reg)
+            if (matches) {
+              ret = JSON.parse(matches[1])
+            }
+          }
+          resp.json(ret)
         }).catch((e) => {
           console.log(e)
         })

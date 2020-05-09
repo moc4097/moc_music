@@ -21,6 +21,9 @@ const mutations = {
   },
   [types.SET_CURRENT_INDEX](state, i) {
     state.currentIndex = i
+  },
+  [types.SET_SONG_MENU](state, songmenu){
+    state.songmenu = songmenu
   }
 }
 

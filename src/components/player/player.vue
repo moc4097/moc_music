@@ -452,7 +452,10 @@
         // 这里使用setTimeout而不使用this.$nextTick是因为要保证后台切到前台可以正常播放
         setTimeout(() => {
           this.getLyric()
-          this.$refs.audio.play()
+          // 因为获取需要时间，这样保证歌词显示和播放进度一致
+          setTimeout(() => {
+            this.$refs.audio.play()
+          }, 500)
         }, 1000)
       },
       playing(newPlaying) {

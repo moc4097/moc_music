@@ -6,7 +6,7 @@
   import MusicList from 'components/music-list/music-list'
   import {createSong, isValidMusic, processSongsUrl} from 'common/js/song'
   import {mapGetters} from 'vuex'
-  import {getSingerDetail} from 'api/singer'
+  import {getSongList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
 
   export default {
@@ -18,27 +18,27 @@
     },
     computed: {
       title() {
-        return this.singer.name
+        return this.songmenu.dissname
       },
       bgImage() {
-        return this.singer.avatar
+        return this.songmenu.imgurl
       },
       ...mapGetters([
-        'singer'
+        'songmenu'
       ])
     },
     created() {
-      this._getDetail()
+      this._getSongList()
     },
     methods: {
-      _getDetail() {
-        if (!this.singer.id) {
-          this.$router.push('/singer')
+      _getSongList() {
+        if (!this.songmenu.dissid) {
+          this.$router.push('/recommend')
           return
         }
-        getSingerDetail(this.singer.id).then((res) => {
+        getSongList(this.songmenu.dissid).then((res) => {
           if (res.code === ERR_OK) {
-            processSongsUrl(this._normalizeSongs(res.data.list)).then((songs) => {
+            processSongsUrl(this._normalizeSongs(res.cdlist[0].songlist)).then((songs) => {
               this.songs = songs
             })
           }
@@ -46,8 +46,7 @@
       },
       _normalizeSongs(list) {
         let ret = []
-        list.forEach((item) => {
-          let {musicData} = item
+        list.forEach((musicData) => {
           if (isValidMusic(musicData)) {
             ret.push(createSong(musicData))
           }

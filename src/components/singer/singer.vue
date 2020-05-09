@@ -2,6 +2,7 @@
   <div class="singer" ref="singer">
     <list-view :data="singers" @select="selectSinger" ref="list"></list-view>
     <transition name="slide">
+      <!-- 歌手详情页出口 -->
       <router-view></router-view>
     </transition>
   </div>

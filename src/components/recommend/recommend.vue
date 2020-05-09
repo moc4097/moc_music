@@ -6,7 +6,7 @@
         <div class="recommend-list">
           <h1 class="list-title">热门歌单推荐</h1>
           <ul>
-            <li v-for="item in discList" class="item">
+            <li @click="selectItem(item)" v-for="item in discList" class="item">
               <div class="icon">
                 <img width="60" height="60" v-lazy="item.imgurl" />
               </div>
@@ -22,6 +22,10 @@
         <loading></loading>
       </div>
     </scroll>
+    <transition name="slide">
+      <!-- 歌单详情页出口 -->
+      <router-view></router-view>
+    </transition>
   </div>
 </template>
 
@@ -31,6 +35,7 @@
   import {getRecommend, getDiscList} from 'api/recommend'
   import {ERR_OK} from 'api/config'
   import {playlistMixin} from 'common/js/mixin'
+  import {mapMutations} from 'vuex'
 
   export default {
     mixins: [playlistMixin],
@@ -53,6 +58,12 @@
         this.$refs.recommend.style.bottom = bottom
         this.$refs.scroll.refresh()
       },
+      selectItem(item) {
+        this.$router.push({
+          path: `/recommend/${item.dissid}`
+        })
+        this.setSongmenu(item)
+      },
       _getRecommend: function() {
         getRecommend().then((res) => {
           if (res.code === ERR_OK) {
@@ -66,7 +77,10 @@
             this.discList = res.data.list
           }
         })
-      }
+      },
+      ...mapMutations({
+        setSongmenu: 'SET_SONG_MENU'
+      })
     },
     components: {
       Scroll,
@@ -124,4 +138,9 @@
         width: 100%
         top: 50%
         transform: translateY(-50%)
+  .slide-enter-active, .slide-leave-active
+    transition: all .3s
+
+  .slide-enter, .slide-leave-to
+    transform: translate3d(100%, 0, 0)
 </style>
