@@ -13,7 +13,7 @@ export function getRecommend() {
 
   return jsonp(url, data, options) */
 
-  const url = '/api/getRecommend';
+  const url = '/api/getRecommend'
 
   const data = Object.assign({}, commonParams, {
     platform: 'H5',
@@ -25,12 +25,12 @@ export function getRecommend() {
   return axios.get(url, {
     params: data
   }).then((res) => {
-    return Promise.resolve(res.data);
+    return Promise.resolve(res.data)
   })
 }
 
-export function getDiscList(){
-  const url = '/api/getDiscList';
+export function getDiscList() {
+  const url = '/api/getDiscList'
 
   const data = Object.assign({}, commonParams, {
     platform: 'yqq',
@@ -42,11 +42,11 @@ export function getDiscList(){
     categoryId: 10000000,
     rnd: Math.random(),
     format: 'json'
-  });
+  })
 
   return axios.get(url, {
     params: data
   }).then((res) => {
-    return Promise.resolve(res.data);
-  });
+    return Promise.resolve(res.data)
+  })
 }

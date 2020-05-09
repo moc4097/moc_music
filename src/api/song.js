@@ -1,8 +1,26 @@
-import jsonp from 'common/js/jsonp'
 import axios from 'axios'
-import {commonParams, options} from './config'
+import {commonParams} from './config'
 import {ERR_OK} from 'api/config'
 import {getUid} from 'common/js/uid'
+
+export function getLyric(mid) {
+  const url = '/api/getLyric'
+
+  const data = Object.assign({}, commonParams, {
+    songmid: mid,
+    pcachetime: +new Date(),
+    platform: 'yqq',
+    hostUin: 0,
+    needNewCode: 0,
+    format: 'json'
+  })
+
+  return axios.get(url, {
+    params: data
+  }).then((res) => {
+    return Promise.resolve(res.data)
+  })
+}
 
 export function getSongsUrl(songs) {
   const url = '/api/getPurlUrl'
@@ -18,7 +36,6 @@ export function getSongsUrl(songs) {
   const urlMid = genUrlMid(mids, types)
 
   const data = Object.assign({}, commonParams, {
-    g_tk: 5381,
     format: 'json',
     platform: 'h5',
     needNewCode: 1,

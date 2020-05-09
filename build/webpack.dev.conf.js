@@ -67,6 +67,31 @@ const devWebpackConfig = merge(baseWebpackConfig, {
             'Content-type': 'application/x-www-form-urlencoded'
           }
         }).then((res) => {
+          // 如果请求的是jsonp数据，则使用正则对jsonp数据分析获取里面的json
+          var ret = res.data
+          if (typeof ret === 'string') {
+            var reg = /^\w+\(({[^()]+})\)$/
+            var matches = ret.match(reg)
+            if (matches) {
+              ret = JSON.parse(matches[1])
+            }
+          }
+          resp.json(ret)
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
+
+      app.get('/api/getLyric', function(req, resp) {
+        const url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
+
+        axios.get(url, {
+          headers: {
+            referer: 'https://c.y.qq.com/',
+            host: 'c.y.qq.com'
+          },
+          params: req.query
+        }).then((res) => {
           resp.json(res.data)
         }).catch((e) => {
           console.log(e)
