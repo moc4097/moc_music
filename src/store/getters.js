@@ -17,3 +17,5 @@ export const currentSong = (state) => {
 }
 
 export const songmenu = state => state.songmenu
+
+export const topList = state => state.topList

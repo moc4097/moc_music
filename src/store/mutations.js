@@ -24,6 +24,9 @@ const mutations = {
   },
   [types.SET_SONG_MENU](state, songmenu){
     state.songmenu = songmenu
+  },
+  [types.SET_TOP_LIST](state, topList) {
+    state.topList = topList
   }
 }
 

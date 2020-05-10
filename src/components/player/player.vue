@@ -336,8 +336,9 @@
           this.currentLyric = new Lyric(lyric, this.handleLyric)
           if (this.playing) {
             this.currentLyric.play()
+            // 同步歌词和歌曲的播放进度
+            this.currentLyric.seek(this.currentTime * 1000 + 500)
           }
-          console.log(this.currentLyric)
         }).catch(() => {
           this.currentLyric = null
           this.currentLineNum = 0
@@ -452,10 +453,7 @@
         // 这里使用setTimeout而不使用this.$nextTick是因为要保证后台切到前台可以正常播放
         setTimeout(() => {
           this.getLyric()
-          // 因为获取需要时间，这样保证歌词显示和播放进度一致
-          setTimeout(() => {
-            this.$refs.audio.play()
-          }, 500)
+          this.$refs.audio.play()
         }, 1000)
       },
       playing(newPlaying) {
