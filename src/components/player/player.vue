@@ -443,15 +443,22 @@
     },
     watch: {
       currentSong(newSong, oldSong) {
+        if(!newSong.id) {
+          return
+        }
         if (newSong.id === oldSong.id) {
           return
         }
         // 切换到下一首时，清空歌词对象中的计时器
         if (this.currentLyric) {
           this.currentLyric.stop()
+          this.currentTime = 0
+          this.playingLyric = ''
+          this.currentLineNum = 0
         }
+        clearTimeout(this.timer)
         // 这里使用setTimeout而不使用this.$nextTick是因为要保证后台切到前台可以正常播放
-        setTimeout(() => {
+        this.timer = setTimeout(() => {
           this.getLyric()
           this.$refs.audio.play()
         }, 1000)
