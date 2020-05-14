@@ -30,7 +30,7 @@
               </div>
             </div>
             <div class="playing-lyric-wrapper">
-              <div class="playing-lyric">{{ playingLyric }}</div>
+              <div class="playing-lyric" v-html="playingLyric"></div>
             </div>
           </div>
           <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
@@ -40,7 +40,8 @@
                    class="text"
                    v-for="(line, index) in currentLyric.lines"
                    :class="{'current': currentLineNum === index}"
-                >{{ line.txt }}</p>
+                   v-html="line.txt"
+                ></p>
               </div>
             </div>
           </scroll>
@@ -74,7 +75,10 @@
               <i class="icon-next" @click="next"></i>
             </div>
             <div class="icon i-right">
-              <i class="icon icon-not-favorite"></i>
+              <i class="icon"
+                 @click="toggleFavorite(currentSong)"
+                 :class="getFavoriteIcon(currentSong)"
+              ></i>
             </div>
           </div>
         </div>
@@ -107,7 +111,7 @@
 
     <audio ref="audio"
            :src="currentSong.url"
-           @canplay="ready"
+           @play="ready"
            @error="error"
            @timeupdate="updateTime"
            @ended="end"
@@ -116,6 +120,7 @@
 </template>
 
 <script>
+  import Song from 'common/js/song'
   import {mapGetters, mapMutations, mapActions} from 'vuex'
   import animations from 'create-keyframe-animation'
   import {prefixStyle} from 'common/js/dom'
@@ -126,6 +131,7 @@
   import Scroll from 'base/scroll/scroll'
   import Playlist from 'components/playlist/playlist'
   import {playerMixin} from 'common/js/mixin'
+  import {processSongsUrl} from 'common/js/song'
 
   const transform = prefixStyle('transform')
   const transitionDuration = prefixStyle('transitionDuration')
@@ -139,7 +145,8 @@
         currentLyric: null,
         currentLineNum: 0,
         currentShow: 'cd',
-        playingLyric: ''
+        playingLyric: '',
+        updateCurrentSong: null
       }
     },
     computed: {
@@ -217,9 +224,25 @@
       },
       ready() {
         this.songReady = true
-        this.savePlayHistory(this.currentSong)
+        if (this.updateCurrentSong && this.currentSong.id === this.updateCurrentSong.id) {
+          this.savePlayHistory(this.updateCurrentSong)
+        } else {
+          this.savePlayHistory(this.currentSong)
+        }
       },
       error() {
+        // 如果播放地址过期
+        const song = JSON.parse(JSON.stringify(this.currentSong))
+        let updateSongs = []
+        updateSongs.push(new Song(song))
+        processSongsUrl(updateSongs).then((songs) => {
+          updateSongs = songs
+          this.updateCurrentSong = updateSongs[0]
+          this.insertSong({
+            song: updateSongs[0]
+          })
+        })
+
         this.songReady = true
       },
       updateTime(e) {
@@ -258,6 +281,7 @@
         // 如果只有一首歌曲，就直接调用loop方法，不用重新获取数据
         if (this.playList.length === 1) {
           this.loop()
+          return
         } else {
           let index = this.currentIndex - 1
           if (index === -1) {
@@ -277,6 +301,7 @@
         // 如果只有一首歌曲，就直接调用loop方法，不用重新获取数据
         if (this.playList.length === 1) {
           this.loop()
+          return
         } else {
           let index = this.currentIndex + 1
           if (index === this.playList.length) {
@@ -311,6 +336,9 @@
       },
       getLyric() {
         this.currentSong.getLyric().then((lyric) => {
+          if (this.currentSong.lyric !== lyric) {
+            return
+          }
           this.currentLyric = new Lyric(lyric, this.handleLyric)
           if (this.playing) {
             this.currentLyric.play()
@@ -418,7 +446,8 @@
         setFullScreen: 'SET_FULL_SCREEN'
       }),
       ...mapActions([
-        'savePlayHistory'
+        'savePlayHistory',
+        'insertSong'
       ])
     },
     watch: {
